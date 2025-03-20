@@ -9,3 +9,8 @@ class Logger:
         with open(self.filename, "a") as file:
             writer = csv.writer(file)
             writer.writerow([datetime.now()] + data)
+
+            import logging
+
+def setup_logger():
+    logging.basicConfig(level=logging.DEBUG)
