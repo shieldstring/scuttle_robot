@@ -1,37 +1,48 @@
-import threading
 from L1.L1_motor import MotorController
 from L2.L2_kinematics import Kinematics
+from utils.constants import WHEELBASE
 import logging
+import time
 
-# Configure logging for debugging
-logging.basicConfig(level=logging.DEBUG)
+logger = logging.getLogger(__name__)
 
 class DriveController:
     def __init__(self):
-        self.motor_controller = MotorController([17, 18, 22, 23])
-        self.kinematics = Kinematics(0.405)  # Wheelbase in meters
+        self.motor = MotorController()
+        self.kinematics = Kinematics(WHEELBASE)
+        self._running = False
 
-    def drive(self, x_dot, theta_dot):
-        """
-        Drive the robot based on desired x_dot and theta_dot.
-        """
+        # safety variables 
+        self._last_update = 0
+        self._command_timeout = 0.5  # seconds
+        
+        logger.info("Drive controller initialized")
+
+    def driving_thread(self):
+        """Main control loop with safety checks"""
+        self._running = True
         try:
-            phiL = x_dot - theta_dot * self.kinematics.wheelbase / 2
-            phiR = x_dot + theta_dot * self.kinematics.wheelbase / 2
-            self.motor_controller.set_speed([phiL, phiR, phiL, phiR])
-            logging.debug(f"Driving with x_dot={x_dot}, theta_dot={theta_dot}")
+            while self._running:
+                 # Auto-stop if no recent commands
+                if time.time() - self._last_update > self._command_timeout:
+                    self.motor.stop()
+                    time.sleep(0.1)
+                    continue
+                
+                # Get commands from L2 systems
+                x_dot, theta_dot = self._get_commands()  # Implement your logic
+                
+                # Convert to wheel speeds
+                speeds = self.kinematics.compute_wheel_speeds(x_dot, theta_dot)
+                         
+                # Drive motors
+                self.motor.set_speed(speeds)
+                                
         except Exception as e:
-            logging.error(f"An error occurred while driving: {e}")
+            logger.error(f"Control error: {e}", exc_info=True)
             raise
-
-# Multithreading example
-drive_controller = DriveController()
-
-def driving_thread():
-    while True:
-        # Get x_dot and theta_dot from gamepad or autonomous logic
-        x_dot, theta_dot = 0.5, 0.1  # Example values
-        drive_controller.drive(x_dot, theta_dot)
-
-thread = threading.Thread(target=driving_thread)
-thread.start()
+        finally:
+            self.motor.stop()
+        
+    def stop(self):
+        self._running = False

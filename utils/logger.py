@@ -1,6 +1,6 @@
 import csv
 from datetime import datetime
-
+import logging
 class Logger:
     def __init__(self, filename="log.csv"):
         self.filename = filename
@@ -10,7 +10,9 @@ class Logger:
             writer = csv.writer(file)
             writer.writerow([datetime.now()] + data)
 
-            import logging
 
 def setup_logger():
-    logging.basicConfig(level=logging.DEBUG)
+    logging.basicConfig(
+        level=logging.INFO,
+        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    )
