@@ -1,15 +1,29 @@
-from L3.L3_mission_control import MissionControl
-import logging
+import time
+from L3.L3_drive_mt import DriveSystem
+from utils.logger import setup_logger
+import signal
 
-# Configure logging for debugging
-logging.basicConfig(level=logging.DEBUG)
+logger = setup_logger('main')
 
-def main():
-    try:
-        mission_control = MissionControl()
-        mission_control.start_mission()
-    except Exception as e:
-        logging.error(f"An error occurred: {e}")
+def shutdown_handler(signum, frame):
+    logger.warning("Shutdown signal received")
+    drive_system.stop()
+    exit(0)
 
 if __name__ == "__main__":
-    main()
+    # Register shutdown handlers
+    signal.signal(signal.SIGINT, shutdown_handler)
+    signal.signal(signal.SIGTERM, shutdown_handler)
+
+    try:
+        logger.info("Starting SCUTTLE robot")
+        drive_system = DriveSystem()
+        drive_system.start()
+        
+        # Main blocking loop
+        while True:
+            time.sleep(1)
+            
+    except Exception as e:
+        logger.critical(f"Fatal error: {e}")
+        drive_system.stop()
