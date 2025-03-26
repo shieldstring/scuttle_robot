@@ -200,3 +200,25 @@ sudo systemctl start scuttle_robot.service
 ```
 sudo systemctl status scuttle_robot.service
 ```
+
+Service pigpio
+```
+[Unit]
+Description=pigpio daemon
+After=network.target
+
+[Service]
+Type=forking
+ExecStart=/usr/bin/pigpiod
+Restart=always
+# If pigpiod needs specific parameters, add them to the line above
+# Example: ExecStart=/usr/bin/pigpiod -o -l  # -o for no prompts, -l for log
+
+[Install]
+WantedBy=multi-user.target
+```
+
+
+```
+sudo nano /etc/systemd/system/pigpiod.service
+```
