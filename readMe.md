@@ -149,3 +149,54 @@ To start the SCUTTLE Robot system, run:
 ```sh
 python main.py
 ```
+
+## Fix
+```
+sudo systemctl enable pigpiod
+sudo systemctl start pigpiod
+```
+
+Create a Systemd Service
+1. Create a new service file:
+```
+sudo nano /etc/systemd/system/scuttle_robot.service
+```
+
+2. Add the following content to the file:
+```
+[Unit]
+Description=SCUTTLE Robot Application (venv)
+After=network.target pigpiod.service
+
+[Service]
+Type=simple
+User=pi
+WorkingDirectory=/home/pi/scuttle_robot
+# Use the venv's Python interpreter and your main.py
+ExecStart=/home/pi/scuttle_robot/myenv/bin/python /home/pi/scuttle_robot/main.py
+Restart=always
+RestartSec=5
+Environment=PYTHONUNBUFFERED=1
+
+# Logging (optional)
+StandardOutput=syslog
+StandardError=syslog
+SyslogIdentifier=scuttle_robot
+
+[Install]
+WantedBy=multi-user.target
+```
+
+3. Save and exit the file (Ctrl + X, then Y).
+4. Enable the service:
+```
+sudo systemctl enable scuttle_robot.service
+```
+5. Start the service:
+```
+sudo systemctl start scuttle_robot.service
+```
+6. Check the status of the service:
+```
+sudo systemctl status scuttle_robot.service
+```
