@@ -1,5 +1,6 @@
 import time
 from L3.L3_drive_mt import DriveSystem
+from L3.L3_mission_control import MissionControl
 from utils.logger import setup_logger
 import signal
 import logging
@@ -12,6 +13,12 @@ def shutdown_handler(signum, frame):
     logger.warning("Shutdown signal received")
     if 'drive_system' in globals():
         drive_system.stop()
+    exit(0)
+
+def signal_handler(sig, frame):
+    logging.warning("Shutting down...")
+    if 'mission' in globals():
+        MissionControl.stop_mission()
     exit(0)
 
 if __name__ == "__main__":
