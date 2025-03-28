@@ -2,12 +2,16 @@ import time
 from L3.L3_drive_mt import DriveSystem
 from utils.logger import setup_logger
 import signal
+import logging
 
-logger = setup_logger('main')
+# Initialize the logger (no arguments needed as per your setup)
+setup_logger()
+logger = logging.getLogger('main')  # Create named logger after setup
 
 def shutdown_handler(signum, frame):
     logger.warning("Shutdown signal received")
-    drive_system.stop()
+    if 'drive_system' in globals():
+        drive_system.stop()
     exit(0)
 
 if __name__ == "__main__":
@@ -26,4 +30,5 @@ if __name__ == "__main__":
             
     except Exception as e:
         logger.critical(f"Fatal error: {e}")
-        drive_system.stop()
+        if 'drive_system' in locals():
+            drive_system.stop()
