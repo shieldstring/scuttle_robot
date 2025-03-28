@@ -28,7 +28,7 @@ These programs are responsible for direct communication with the hardware. For t
 
    - L1_gamepad.py: Reads input from the gamepad controller.
 
-   - L1_camera.py: Captures images from the USB camera.
+   - L1_camera.py: Captures images from the USB camera
 
    - L1_mpu.py: Reads data from the IMU (MPU9250) for orientation and motion data.
 
