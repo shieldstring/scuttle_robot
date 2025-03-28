@@ -17,6 +17,7 @@ class MotorController:
             ) for pin in MOTOR_PINS
         ]
         logger.info(f"Motors ready on pins: {MOTOR_PINS}")
+        self._is_emergency_stopped = False
 
     def set_speed(self, speeds):
         """Set speeds between -1.0 (full reverse) and 1.0 (full forward)"""
@@ -24,8 +25,23 @@ class MotorController:
             motor.value = max(-1.0, min(1.0, speed))
         logger.debug(f"Motor speeds set: {speeds}")
 
-    def stop(self):
-        """Emergency stop all motors"""
+    def stop(self, emergency=False):
+        
+        """Stop all motors
+        Args:
+            emergency: If True, logs as warning (for unexpected stops)
+        """
+        self._is_emergency_stopped = emergency
+
         for motor in self.motors:
             motor.value = 0
-        logger.warning("Motors forcefully stopped")
+        if emergency:
+            logger.warning("Motors forcefully stopped")
+        else:
+            logger.info("Motors stopped normally")
+            
+    def status(self):
+        return {
+            "emergency_stop": self._is_emergency_stopped,
+            "speeds": [m.value for m in self.motors]
+        }

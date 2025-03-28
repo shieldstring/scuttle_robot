@@ -55,8 +55,12 @@ class DriveSystem:
         self.control_thread.start()
         logger.info("Drive system started")
 
+    # In DriveController:
     def stop(self):
-        """Stop the drive system"""
-        self.controller.stop()
-        self.control_thread.join()
-        logger.info("Drive system stopped")
+        self._running = False
+        self.motor.stop(emergency=False)  # Normal expected stop
+
+        # In timeout check:
+        if time.time() - self._last_update > self._command_timeout:
+            self.motor.stop(emergency=True)  # Unexpected stop
+            time.sleep(0.1)
