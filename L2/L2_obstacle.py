@@ -1,14 +1,21 @@
-import numpy as np
+import logging
+from utils.logger import setup_logger
 
 class ObstacleDetector:
-    def __init__(self):
-        self.nearest_obstacle = None
+    def __init__(self, lidar):
+        setup_logger()
+        self.logger = logging.getLogger('obstacle')
+        self.lidar = lidar
 
-    def detect_obstacle(self, lidar_data):
-        # Find the nearest obstacle from LIDAR data
-        distances = [point[0] for point in lidar_data]
-        angles = [point[1] for point in lidar_data]
-        min_distance = min(distances)
-        min_index = distances.index(min_distance)
-        self.nearest_obstacle = (min_distance, angles[min_index])
-        return self.nearest_obstacle
+    def get_front_obstacles(self, scan, cone_angle=45):
+        """Return obstacles in front cone"""
+        if not scan:
+            return None
+        return [p for p in scan if -cone_angle <= p[1] <= cone_angle]
+
+    def get_min_distance(self, scan):
+        """Get minimum distance in meters"""
+        front_scan = self.get_front_obstacles(scan)
+        if front_scan:
+            return min(p[2] for p in front_scan) / 1000.0  # mm to m
+        return float('inf')

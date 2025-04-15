@@ -222,3 +222,17 @@ WantedBy=multi-user.target
 ```
 sudo nano /etc/systemd/system/pigpiod.service
 ```
+
+```
+# Install RPLIDAR dependencies
+sudo apt-get update
+sudo apt-get install -y python3-pip python3-serial
+sudo pip3 install py-rplidar
+
+```
+```
+# Set up USB permissions (permanent solution)
+echo 'KERNEL=="ttyUSB*", MODE="0666"' | sudo tee /etc/udev/rules.d/99-rplidar.rules
+sudo udevadm control --reload-rules
+sudo usermod -a -G dialout pi  # Replace "pi" with your username if different
+```
